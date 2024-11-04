@@ -12,10 +12,6 @@ model = genai.GenerativeModel('gemini-pro')
 
 class Event(Cog_extension):
     @commands.Cog.listener()
-    async def on_application_command_error(self, ctx:discord.ApplicationContext, error):
-        await ctx.respond(error, ephemeral=True)
-
-    @commands.Cog.listener()
     async def on_command_error(self, ctx:commands.Context, error):
         if isinstance(error, commands.CommandOnCooldown):
             await ctx.send(content='Command on cooldown... please wait')
@@ -28,7 +24,7 @@ class Event(Cog_extension):
     
     @commands.Cog.listener()
     async def on_message(self, msg:discord.Message):
-        if msg.content.startswith(self.bot.user.mention):
+        if self.bot.user in msg.mentions and msg.author!=self.bot.user:
             div = msg.content.split()
             for i in range(len(div)):
                 if div[i].startswith('<@'):
@@ -38,5 +34,5 @@ class Event(Cog_extension):
             response = model.generate_content(prompt)
             await msg.channel.send(response.text)
 
-def setup(bot):
-    bot.add_cog(Event(bot))
+async def setup(bot):
+    await bot.add_cog(Event(bot))
