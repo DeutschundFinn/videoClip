@@ -31,8 +31,8 @@ def generatesrt(segments, file_id):
     
     with open(output_file, 'w', encoding='utf8') as file:
         for segment in segments:
-            start = formattedtime(format(segment.start))
-            end = formattedtime(format(segment.end))
+            start = formattedtime(format(segment.start, '.3f'))
+            end = formattedtime(format(segment.end, '.3f'))
             count += 1
             txt = f"{count}\n{start} --> {end}\n{segment.text}\n\n" #srt檔案表示法(/表示分行): 順序/開始時間 --> 結束時間/文字
             file.write(txt) #讀取csv檔並寫入srt
