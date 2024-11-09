@@ -14,18 +14,18 @@ class TranslateFile(Cog_extension):
         if not os.path.exists('translate'): #產生存放文字檔的資料夾
             os.makedirs('translate')
         message_id = int(url.split('/')[-1])
-        translator = GoogleTranslator(source=source, target=target)
+        translator = GoogleTranslator(source=source, target=target) #翻譯器採用Google翻譯
         try:
-            message = await interaction.channel.fetch_message(message_id)
-            file = message.attachments[0]
+            message = await interaction.channel.fetch_message(message_id) #找到目標訊息
+            file = message.attachments[0] 
             outputFile = f"./translate/{file.filename}"
-            await file.save(outputFile)
+            await file.save(outputFile) #下載文字檔
             frmat = file.filename.split('.')[-1]
-            if frmat == 'txt':
+            if frmat == 'txt': #檢查如果是txt直接翻譯
                 text = translator.translate_file(outputFile)
                 with open(outputFile, 'w', encoding='utf8') as txtFile:
                     txtFile.write(text)
-            elif frmat == 'csv':
+            elif frmat == 'csv': #檢查如果是csv把檔案的文字部分翻譯完丟回檔案
                 data = []
                 with open(outputFile, encoding='utf8') as csvFile:
                     reader = csv.DictReader(csvFile)
@@ -34,12 +34,12 @@ class TranslateFile(Cog_extension):
                 cols = ["start", "end", "text"]
                 df = pd.DataFrame(data, columns=cols)
                 df.to_csv(outputFile, index=False, mode='w', encoding='utf8')
-            elif frmat == 'srt':
+            elif frmat == 'srt': #檢查如果是srt同csv方式處理
                 texts = []
                 with open(outputFile, 'r', encoding='utf8') as srtFile:
                     texts = srtFile.read().splitlines()
                     for i in range(len(texts)):
-                        if i%4 == 2:
+                        if i%4 == 2: #陣列內部:['順序',  '開始時間-->結束時間', '文字', '', ...]
                             texts[i] = translator.translate(texts[i])
                 
                 with open(outputFile, 'w', encoding='utf8') as srtFile:
