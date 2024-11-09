@@ -31,8 +31,8 @@ def generatesrt(segments, file_id):
     
     with open(output_file, 'w', encoding='utf8') as file:
         for segment in segments:
-            start = formattedtime(format(segment.start, '.3f'))
-            end = formattedtime(format(segment.end, '.3f'))
+            start = formattedtime(format(segment.start, ".3f"))
+            end = formattedtime(format(segment.end, ".3f"))
             count += 1
             txt = f"{count}\n{start} --> {end}\n{segment.text}\n\n" #srt檔案表示法(/表示分行): 順序/開始時間 --> 結束時間/文字
             file.write(txt) #讀取csv檔並寫入srt
@@ -48,14 +48,14 @@ class ConvertCsvOrSrt(Cog_extension):
         output_file = download_audio_from_youtube(url, file_id)
         if output_file:
             try:
-                segments = transcribe(output_file, language, model)
+                lang, segments = transcribe(output_file, language, model)
                 os.remove(output_file) #轉檔完刪除mp3檔案
                 if not os.path.exists('output'): #產生存放文字檔的資料夾
                     os.makedirs('output')
 
                 csv_file = writetocsv(segments, file_id)
 
-                await interaction.followup.send(content="以下為轉換的csv檔案:", file=discord.File(csv_file))
+                await interaction.followup.send(content=f"以下為轉換的csv檔案:\n語言 {lang}", file=discord.File(csv_file))
                 print("成功轉換成文字稿")
                 if os.path.exists(csv_file):
                     os.remove(csv_file)
@@ -64,8 +64,8 @@ class ConvertCsvOrSrt(Cog_extension):
                     os.rmdir('output')
             
             except Exception as e:
-                    print(f"產生文字稿時發生錯誤: {e}")
-                    await interaction.followup.send(f"產生文字稿時發生錯誤: {e}")
+                print(f"產生文字稿時發生錯誤: {e}")
+                await interaction.followup.send(f"產生文字稿時發生錯誤: {e}")
         
         else:
             await interaction.followup.send("轉檔失敗，請檢查輸入的連結")
@@ -79,14 +79,14 @@ class ConvertCsvOrSrt(Cog_extension):
         output_file = download_audio_from_youtube(url, file_id)
         if output_file:
             try:
-                segments = transcribe(output_file, language, model)
+                lang, segments = transcribe(output_file, language, model)
                 os.remove(output_file) #轉檔完刪除mp3檔案
                 if not os.path.exists('output'): #產生存放文字檔的資料夾
                     os.makedirs('output')
 
                 srt_file = generatesrt(segments, file_id)
 
-                await interaction.followup.send(content="以下為轉換的srt檔案:", file=discord.File(srt_file))
+                await interaction.followup.send(content=f"以下為轉換的srt檔案:\n語言 {lang}", file=discord.File(srt_file))
                 print("成功轉換成文字稿")
 
                 if os.path.exists(srt_file):
@@ -96,8 +96,8 @@ class ConvertCsvOrSrt(Cog_extension):
                     os.rmdir('output')
             
             except Exception as e:
-                    print(f"產生文字稿時發生錯誤: {e}")
-                    await interaction.followup.send(f"產生文字稿時發生錯誤: {e}")
+                print(f"產生文字稿時發生錯誤: {e}")
+                await interaction.followup.send(f"產生文字稿時發生錯誤: {e}")
         
         else:
             await interaction.followup.send("轉檔失敗，請檢查輸入的連結")

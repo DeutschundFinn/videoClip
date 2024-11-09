@@ -38,7 +38,7 @@ def download_file_from_google_drive(file_id, destination):
     save_response_content(response, destination)
 
 class ConvertFromDrive(Cog_extension):
-    @app_commands.command(description='從google雲端硬碟分享連結產生你想要的檔案(使用前請勿逼打開存取權)')
+    @app_commands.command(description='從google雲端硬碟分享連結產生你想要的檔案(使用前請務必打開存取權)')
     @app_commands.describe(url='你要產生檔案的雲端硬碟分享連結', language='音訊的語言', model='轉換時所使用的whisper模型', frmat='需要轉換的檔案(預設是txt檔)')
     async def convert_from_drive(self, 
                                  interaction:discord.Interaction, 
@@ -55,7 +55,7 @@ class ConvertFromDrive(Cog_extension):
         download_file_from_google_drive(file_id, destination)
         if destination:
             try:
-                segments = transcribe(destination, language, model)
+                lang, segments = transcribe(destination, language, model)
                 if frmat == 'wav':
                     result = destination
                 elif frmat == 'txt':
@@ -68,7 +68,7 @@ class ConvertFromDrive(Cog_extension):
                 elif frmat == 'srt':
                     result = generatesrt(segments, file_id)
             
-                await interaction.followup.send(content=f"以下為產生的{frmat}檔案", file=discord.File(result))
+                await interaction.followup.send(content=f"以下為產生的{frmat}檔案\n語言 {lang}", file=discord.File(result))
                 os.remove(destination)
 
                 if os.path.exists(result):

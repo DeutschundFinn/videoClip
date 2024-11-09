@@ -13,9 +13,7 @@ bot=commands.Bot(command_prefix='a!', intents=intents)
 
 @bot.event
 async def on_ready():
-    slashes = await bot.tree.sync()
     print(f"Bot is online!")
-    print(f"Synced {len(slashes)} slash commands")
 
 @bot.command()
 async def load(ctx, extension):
@@ -31,6 +29,11 @@ async def unload(ctx, extension):
 async def reload(ctx, extension):
     await bot.reload_extension(f"cmds.{extension}")
     await ctx.send(f'已重新載入 {extension}')
+
+@bot.command()
+async def sync(ctx):
+    slashes = await bot.tree.sync()
+    await ctx.send(f"已同步{len(slashes)}個斜線指令")
 
 async def load_extenstions():
     for filename in os.listdir('./cmds'):
