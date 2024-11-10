@@ -3,9 +3,6 @@ from discord.ext import commands
 from core.classes import Cog_extension
 import google.generativeai as genai
 import os
-from dotenv import load_dotenv
-
-load_dotenv()
 
 genai.configure(api_key=os.getenv('googleaiKey'))
 model = genai.GenerativeModel('gemini-pro')
