@@ -9,14 +9,17 @@ import pandas as pd
 genai.configure(api_key=os.getenv('googleaiKey'))
 model = genai.GenerativeModel('gemini-pro')
 
-def translateFile(to_lang, prompt): #交由Gemini幫忙翻譯的動作
-    response = model.generate_content(f"Please translate the following text into {to_lang}, while preserving the line breaks (use \\n as the line break marker)::\n\n{prompt}\n\nPlease only return the translated text, with the original line breaks intact, and without any additional explanations or comments.")
+def translateFile(to_lang, from_lang, prompt): #交由Gemini幫忙翻譯的動作
+    if from_lang is None:
+        response = model.generate_content(f"Please translate the following text into {to_lang}, while preserving the line breaks:\n\n{prompt}\n\nPlease only return the translated text, with the original line breaks intact, and without any additional explanations or comments.")
+    else:
+        response = model.generate_content(f"Please translate the following text from {from_lang} into {to_lang}, while preserving the line breaks:\n\n{prompt}\n\nPlease only return the translated text, with the original line breaks intact, and without any additional explanations or comments.")
     return response.text
 
 class TranslateFile(Cog_extension):
     @app_commands.command(description='翻譯指定訊息的文字檔')
-    @app_commands.describe(url='你要進行翻譯的文字檔所在訊息連結', target='你要翻譯成的語言')
-    async def translate(self, interaction:discord.Interaction, url:str, target:str):
+    @app_commands.describe(url='你要進行翻譯的文字檔所在訊息連結', target='你要翻譯成的語言', source='文字檔原本語言')
+    async def translate(self, interaction:discord.Interaction, url:str, target:str, source:str=None):
         await interaction.response.send_message("請稍等一下...")
         if not os.path.exists('translate'): #產生存放文字檔的資料夾
             os.makedirs('translate')
@@ -30,9 +33,9 @@ class TranslateFile(Cog_extension):
             if frmat == 'txt': #檢查如果是txt直接翻譯
                 with open(outputFile, 'r', encoding='utf8') as txtFile:
                     prompt = txtFile.read()
-                text = translateFile(target, prompt)
+                text = translateFile(target, source, prompt)
                 with open(outputFile, 'w', encoding='utf8') as txtFile:
-                    txtFile.write(text)
+                    txtFile.write('\n'.join(text.split('\\n')))
             elif frmat == 'csv': #檢查如果是csv把檔案的文字部分翻譯完丟回檔案
                 data = []
                 div=[]
@@ -42,13 +45,9 @@ class TranslateFile(Cog_extension):
                         div.append(row['text'])
                         data.append([row['start'], row['end'], row['text']])
                     prompt = '\n'.join(div)
-                    text = translateFile(target, prompt)
-                j = 0
-                for line in data:
-                    for i in range(len(line)):
-                        if i == 2:
-                            line[i] = text.splitlines()[j]
-                            j += 1
+                    text = translateFile(target, source, prompt)
+                for i in range(len(data)):
+                    data[i][2] = text.splitlines()[i]
                 cols = ["start", "end", "text"]
                 df = pd.DataFrame(data, columns=cols)
                 df.to_csv(outputFile, index=False, mode='w', encoding='utf8')
@@ -61,7 +60,7 @@ class TranslateFile(Cog_extension):
                         if i%4 == 2: #陣列內部:['順序',  '開始時間-->結束時間', '文字', '', ...]
                             div.append(texts[i])
                     prompt = '\n'.join(div)
-                    text = translateFile(target, prompt)
+                    text = translateFile(target, source, prompt)
                     j = 0
                     for i in range(len(texts)):
                         if i%4 == 2: #陣列內部:['順序',  '開始時間-->結束時間', '文字', '', ...]
