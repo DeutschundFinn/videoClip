@@ -12,11 +12,11 @@ config = genai.GenerationConfig(temperature=0)
 
 def translateFile(to_lang, from_lang, prompt): #交由Gemini幫忙翻譯的動作
     if from_lang is None:
-        response = model.generate_content(f"""Please translate the following content into {to_lang}, automatically detecting source message. Each line begins with an integer followed by a single space (e.g., '1 '), indicating its order. Please preserve this exact format, including the integers, spaces, and their positions, and ensure the number of lines remains the same. Only provide the translation without any additional text or explanation:\n\n
+        response = model.generate_content(f"""Please translate the following content into {to_lang}, automatically detecting the source language. Each line begins with an integer followed by "™" (e.g., "1™"), indicating its order. Please preserve this exact format, including the integers, the "™" symbol, and their positions, ensuring the number of lines remains the same. Provide only the translation without any additional text or explanation:\n\n
                                           {prompt}""", generation_config=config)
 
     else:
-        response = model.generate_content(f"""Please translate the following content into {to_lang}. The source language is {from_lang}. Each line begins with an integer followed by a single space (e.g., '1 '), indicating its order. Please preserve this exact format, including the integers, spaces, and their positions, and ensure the number of lines remains the same. Only provide the translation without any additional text or explanation:\n\n
+        response = model.generate_content(f"""Please translate the following content into {to_lang}, The source language is {from_lang}. Each line begins with an integer followed by "™" (e.g., "1™"), indicating its order. Please preserve this exact format, including the integers, the "™" symbol, and their positions, ensuring the number of lines remains the same. Provide only the translation without any additional text or explanation:\n\n
                                           {prompt}""", generation_config=config)
     return response.text
 
@@ -39,15 +39,16 @@ class TranslateFile(Cog_extension):
                 with open(outputFile, 'r', encoding='utf8') as txtFile:
                     counter = 1
                     for row in txtFile.read().splitlines():
-                        div.append(str(counter)+' '+row)
+                        div.append(str(counter)+'™'+row)
+                        counter += 1
                     prompt = '\n'.join(div)
                 text = translateFile(target, source, prompt)
                 result = text.splitlines()
-                for row in result:
-                    row = row[2:]
-                text = '\n'.join(result)
+                for i in range(len(result)):
+                    result[i] = result[i].split('™')[-1]
                 with open(outputFile, 'w', encoding='utf8') as txtFile:
-                    txtFile.write(text)
+                    txtFile.write('\n'.join(result))
+        
             elif frmat == 'csv': #檢查如果是csv把檔案的文字部分翻譯完丟回檔案
                 data = []
                 div=[]
@@ -55,13 +56,13 @@ class TranslateFile(Cog_extension):
                     reader = csv.DictReader(csvFile)
                     counter = 1
                     for row in reader:
-                        div.append(str(counter)+' '+row['text'])
+                        div.append(str(counter)+'™'+row['text'])
                         data.append([row['start'], row['end'], row['text']])
                         counter += 1
                     prompt = '\n'.join(div)
                     text = translateFile(target, source, prompt)
                 for i in range(len(data)):
-                    data[i][2] = text.splitlines()[i][2:]
+                    data[i][2] = text.splitlines()[i].split('™')[-1]
                 cols = ["start", "end", "text"]
                 df = pd.DataFrame(data, columns=cols)
                 df.to_csv(outputFile, index=False, mode='w', encoding='utf8')
@@ -72,14 +73,14 @@ class TranslateFile(Cog_extension):
                     counter = 1
                     for i in range(len(content)):
                         if i%4 == 2: #陣列內部:['順序',  '開始時間-->結束時間', '文字', '', ...]
-                            div.append(str(counter)+' '+content[i])
+                            div.append(str(counter)+'™'+content[i])
                             counter +=1
                     prompt = '\n'.join(div)
                     text = translateFile(target, source, prompt)
                     j = 0
                     for i in range(len(content)):
                         if i%4 == 2: #陣列內部:['順序',  '開始時間-->結束時間', '文字', '', ...]
-                            content[i] = text.splitlines()[j][2:]
+                            content[i] = text.splitlines()[j].split('™')[-1]
                             j+=1
                 
                 with open(outputFile, 'w', encoding='utf8') as srtFile:
