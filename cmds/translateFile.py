@@ -69,6 +69,13 @@ class TranslateFile(Cog_extension):
                 
                 with open(outputFile, 'w', encoding='utf8') as srtFile:
                     srtFile.write('\n'.join(texts))
+            else:
+                if os.path.exists(outputFile):
+                    os.remove(outputFile)
+                if not os.listdir('./translate'):
+                    os.rmdir('translate')
+                await interaction.followup.send(f"目前不支援目前檔案格式{frmat}")
+                return 
             
             await interaction.followup.send(content=f"這是翻譯完的{frmat}檔案", file=discord.File(outputFile))
             if os.path.exists(outputFile):
