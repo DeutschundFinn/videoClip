@@ -4,6 +4,7 @@ from core.classes import Cog_extension
 import os
 import google.generativeai as genai
 import csv
+import srt
 import pandas as pd
 
 genai.configure(api_key=os.getenv('googleaiKey'))
@@ -69,22 +70,19 @@ class TranslateFile(Cog_extension):
             elif frmat == 'srt': #檢查如果是srt同csv方式處理
                 div = []
                 with open(outputFile, 'r', encoding='utf8') as srtFile:
-                    content = srtFile.read().splitlines()
-                    counter = 1
-                    for i in range(len(content)):
-                        if i%4 == 2: #陣列內部:['順序',  '開始時間-->結束時間', '文字', '', ...]
-                            div.append(str(counter)+'™'+content[i])
-                            counter +=1
+                    content = srtFile.read()
+                    srt_segments = srt.parse(content)
+                    srt_segments = list(srt_segments)
+                    for segment in srt_segments:
+                        div.append(str(segment.index)+'™'+segment.content)
+                    
                     prompt = '\n'.join(div)
                     text = translateFile(target, source, prompt)
-                    j = 0
-                    for i in range(len(content)):
-                        if i%4 == 2: #陣列內部:['順序',  '開始時間-->結束時間', '文字', '', ...]
-                            content[i] = text.splitlines()[j].split('™')[-1]
-                            j+=1
-                
+                    for segment in srt_segments:
+                        segment.content = text.splitlines()[int(segment.index)-1].split('™')[-1]
+                contents = srt.compose(srt_segments)
                 with open(outputFile, 'w', encoding='utf8') as srtFile:
-                    srtFile.write('\n'.join(content))
+                    srtFile.write(contents)
             
             await interaction.followup.send(content=f"這是翻譯完的{frmat}檔案", file=discord.File(outputFile))
             if os.path.exists(outputFile):
