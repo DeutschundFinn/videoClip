@@ -8,12 +8,16 @@ import pandas as pd
 
 genai.configure(api_key=os.getenv('googleaiKey'))
 model = genai.GenerativeModel('gemini-pro')
+config = genai.GenerationConfig(temperature=0)
 
 def translateFile(to_lang, from_lang, prompt): #交由Gemini幫忙翻譯的動作
     if from_lang is None:
-        response = model.generate_content(f"Please translate the following text into {to_lang}, while preserving the line breaks:\n\n{prompt}\n\nPlease only return the translated text, with the original line breaks intact, and without any additional explanations or comments.")
+        response = model.generate_content(f"""Please translate the following content into {to_lang}, automatically detecting source message. Each line begins with an integer followed by a single space (e.g., '1 '), indicating its order. Please preserve this exact format, including the integers, spaces, and their positions, and ensure the number of lines remains the same. Only provide the translation without any additional text or explanation:\n\n
+                                          {prompt}""", generation_config=config)
+
     else:
-        response = model.generate_content(f"Please translate the following text from {from_lang} into {to_lang}, while preserving the line breaks:\n\n{prompt}\n\nPlease only return the translated text, with the original line breaks intact, and without any additional explanations or comments.")
+        response = model.generate_content(f"""Please translate the following content into {to_lang}. The source language is {from_lang}. Each line begins with an integer followed by a single space (e.g., '1 '), indicating its order. Please preserve this exact format, including the integers, spaces, and their positions, and ensure the number of lines remains the same. Only provide the translation without any additional text or explanation:\n\n
+                                          {prompt}""", generation_config=config)
     return response.text
 
 class TranslateFile(Cog_extension):
@@ -31,51 +35,55 @@ class TranslateFile(Cog_extension):
             await file.save(outputFile) #下載文字檔
             frmat = file.filename.split('.')[-1]
             if frmat == 'txt': #檢查如果是txt直接翻譯
+                div = []
                 with open(outputFile, 'r', encoding='utf8') as txtFile:
-                    prompt = txtFile.read()
+                    counter = 1
+                    for row in txtFile.read().splitlines():
+                        div.append(str(counter)+' '+row)
+                    prompt = '\n'.join(div)
                 text = translateFile(target, source, prompt)
+                result = text.splitlines()
+                for row in result:
+                    row = row[2:]
+                text = '\n'.join(result)
                 with open(outputFile, 'w', encoding='utf8') as txtFile:
-                    txtFile.write('\n'.join(text.split('\\n')))
+                    txtFile.write(text)
             elif frmat == 'csv': #檢查如果是csv把檔案的文字部分翻譯完丟回檔案
                 data = []
                 div=[]
                 with open(outputFile, encoding='utf8') as csvFile:
                     reader = csv.DictReader(csvFile)
+                    counter = 1
                     for row in reader:
-                        div.append(row['text'])
+                        div.append(str(counter)+' '+row['text'])
                         data.append([row['start'], row['end'], row['text']])
+                        counter += 1
                     prompt = '\n'.join(div)
                     text = translateFile(target, source, prompt)
                 for i in range(len(data)):
-                    data[i][2] = text.splitlines()[i]
+                    data[i][2] = text.splitlines()[i][2:]
                 cols = ["start", "end", "text"]
                 df = pd.DataFrame(data, columns=cols)
                 df.to_csv(outputFile, index=False, mode='w', encoding='utf8')
             elif frmat == 'srt': #檢查如果是srt同csv方式處理
-                texts = []
                 div = []
                 with open(outputFile, 'r', encoding='utf8') as srtFile:
-                    texts = srtFile.read().splitlines()
-                    for i in range(len(texts)):
+                    content = srtFile.read().splitlines()
+                    counter = 1
+                    for i in range(len(content)):
                         if i%4 == 2: #陣列內部:['順序',  '開始時間-->結束時間', '文字', '', ...]
-                            div.append(texts[i])
+                            div.append(str(counter)+' '+content[i])
+                            counter +=1
                     prompt = '\n'.join(div)
                     text = translateFile(target, source, prompt)
                     j = 0
-                    for i in range(len(texts)):
+                    for i in range(len(content)):
                         if i%4 == 2: #陣列內部:['順序',  '開始時間-->結束時間', '文字', '', ...]
-                            texts[i] = text.splitlines()[j]
+                            content[i] = text.splitlines()[j][2:]
                             j+=1
                 
                 with open(outputFile, 'w', encoding='utf8') as srtFile:
-                    srtFile.write('\n'.join(texts))
-            else:
-                if os.path.exists(outputFile):
-                    os.remove(outputFile)
-                if not os.listdir('./translate'):
-                    os.rmdir('translate')
-                await interaction.followup.send(f"目前不支援目前檔案格式{frmat}")
-                return 
+                    srtFile.write('\n'.join(content))
             
             await interaction.followup.send(content=f"這是翻譯完的{frmat}檔案", file=discord.File(outputFile))
             if os.path.exists(outputFile):
@@ -86,7 +94,6 @@ class TranslateFile(Cog_extension):
         except Exception as e:
             print(f"翻譯時發生錯誤: {e}")
             await interaction.followup.send(f"翻譯時發生錯誤: {e}")
-
 
 async def setup(bot):
     await bot.add_cog(TranslateFile(bot))

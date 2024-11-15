@@ -8,7 +8,7 @@ import os
 
 def transcribe(audio, lang, mod):
     print(f"正在轉換{audio}") 
-    model = WhisperModel(mod, compute_type='int8_float32', device='cpu') #系統限制，一般情況下compute_type可省略
+    model = WhisperModel(mod, compute_type='int8_float32')
     segments, info = model.transcribe(audio, language=lang, vad_filter=False, vad_parameters=dict(min_silence_duration_ms=100))  #Segments是以每個有100毫秒的無人聲片段所切間隔
     language = info[0]
     print("文字檔語言", language)

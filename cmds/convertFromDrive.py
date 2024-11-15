@@ -7,7 +7,7 @@ from cmds.convertTxt import transcribe
 from cmds.convertCsvOrSrt import writetocsv, generatesrt
 import requests
 
-def get_confirm_token(response:requests.Response):
+def get_confirm_token(response:requests.Response): #確認是否會遇到下載警告
     for key, value in response.cookies.items():
         if key.startswith("download_warning"):
             return value
@@ -20,7 +20,7 @@ def save_response_content(response:requests.Response, destination):
 
     with open(destination, "wb") as f:
         for chunk in response.iter_content(CHUNK_SIZE):
-            if chunk:  # filter out keep-alive new chunks
+            if chunk:  #限制寫入速度
                 f.write(chunk)
 
 def download_file_from_google_drive(file_id, destination):
@@ -31,7 +31,7 @@ def download_file_from_google_drive(file_id, destination):
     response = session.get(URL, params={"id": file_id}, stream=True)  #獲取回應
     token = get_confirm_token(response)
 
-    if token: #當檔案太大時
+    if token: #當跑出下載警告時
         params = {"id": file_id, "confirm": token}
         response = session.get(URL, params=params, stream=True)
 
