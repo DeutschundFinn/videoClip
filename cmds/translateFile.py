@@ -21,6 +21,7 @@ def translateFile(to_lang, from_lang, prompt): #交由Gemini幫忙翻譯的動�
                                           {prompt}""", generation_config=config)
     return response.text
 
+
 class TranslateFile(Cog_extension):
     @app_commands.command(description='翻譯指定訊息的文字檔')
     @app_commands.describe(url='你要進行翻譯的文字檔所在訊息連結', target='你要翻譯成的語言', source='文字檔原本語言')
@@ -28,16 +29,19 @@ class TranslateFile(Cog_extension):
         await interaction.response.send_message("請稍等一下...")
         if not os.path.exists('translate'): #產生存放文字檔的資料夾
             os.makedirs('translate')
+        if not os.path.exists('result'): #產生存放文字檔的資料夾
+            os.makedirs('result')
         message_id = int(url.split('/')[-1])
         try:
             message = await interaction.channel.fetch_message(message_id) #找到目標訊息
             file = message.attachments[0] 
-            outputFile = f"./translate/{file.filename}"
-            await file.save(outputFile) #下載文字檔
+            sourceFile = f"./translate/{file.filename}"
+            outputFile = f"./result/{file.filename}"
+            await file.save(sourceFile) #下載文字檔
             frmat = file.filename.split('.')[-1]
             if frmat == 'txt': #檢查如果是txt直接翻譯
                 div = []
-                with open(outputFile, 'r', encoding='utf8') as txtFile:
+                with open(sourceFile, 'r', encoding='utf8') as txtFile:
                     counter = 1
                     for row in txtFile.read().splitlines():
                         div.append(str(counter)+'™'+row)
@@ -53,7 +57,7 @@ class TranslateFile(Cog_extension):
             elif frmat == 'csv': #檢查如果是csv把檔案的文字部分翻譯完丟回檔案
                 data = []
                 div=[]
-                with open(outputFile, encoding='utf8') as csvFile:
+                with open(sourceFile, encoding='utf8') as csvFile:
                     reader = csv.DictReader(csvFile)
                     counter = 1
                     for row in reader:
@@ -85,11 +89,14 @@ class TranslateFile(Cog_extension):
                     srtFile.write(contents)
             
             await interaction.followup.send(content=f"這是翻譯完的{frmat}檔案", file=discord.File(outputFile))
+            if os.path.exists(sourceFile):
+                os.remove(sourceFile)
             if os.path.exists(outputFile):
                 os.remove(outputFile)
             if not os.listdir('./translate'):
                 os.rmdir('translate')
-        
+            if not os.listdir('./result'):
+                os.rmdir('result')
         except Exception as e:
             print(f"翻譯時發生錯誤: {e}")
             await interaction.followup.send(f"翻譯時發生錯誤: {e}")
