@@ -5,9 +5,15 @@ from cmds.convertWav import download_audio_from_youtube
 from typing import Literal
 from faster_whisper import WhisperModel
 import os
+import librosa
+import noisereduce
+import soundfile
 
 def transcribe(audio, lang, mod):
-    print(f"正在轉換{audio}") 
+    print(f"正在轉換{audio}")
+    buffer, sample_rate = librosa.load(audio, sr=None) #讀取音訊檔案
+    buffer_denoised = noisereduce.reduce_noise(buffer, sr=sample_rate) #降噪
+    soundfile.write(audio, buffer_denoised, sample_rate) #重新寫入並覆蓋原檔
     model = WhisperModel(mod, compute_type='int8_float32')
     segments, info = model.transcribe(audio, language=lang, vad_filter=False, vad_parameters=dict(min_silence_duration_ms=100))  #Segments是以每個有100毫秒的無人聲片段所切間隔
     language = info[0]
