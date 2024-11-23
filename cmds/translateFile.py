@@ -113,6 +113,10 @@ class RetranslationView(discord.ui.View): #按鈕
         for item in self.children:
             if item.disabled:
                 return
+            else:
+                item.disabled = True
+        
+        await self.response.edit(view=self)
         if os.path.exists(self.sourceFile):
             os.remove(self.sourceFile)
         if os.path.exists(self.destination):
@@ -141,7 +145,7 @@ class TranslateFile(Cog_extension):
             frmat = file.filename.split('.')[-1]
             translateFile(sourceFile, outputFile, target, source) #翻譯文字檔
             view = RetranslationView(sourceFile, outputFile, source) #新增一群按鈕
-            await interaction.edit_original_response(content=f"這是翻譯完的{frmat}檔案", attachments=[discord.File(outputFile)], view=view)
+            view.response = await interaction.edit_original_response(content=f"這是翻譯完的{frmat}檔案", attachments=[discord.File(outputFile)], view=view)
             
         except Exception as e:
             print(f"翻譯時發生錯誤: {e}")
