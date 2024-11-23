@@ -8,9 +8,8 @@ import os
 # youtube影片網址下載為mp3
 def download_audio_from_youtube(video_url, file_id):
     try:
-        output_file_yt = f"{file_id}.mp3"
+        output_file_yt = f"{file_id}.wav"
 
-        # -x是提取音訊用的 check=True表示如果yt-dlp命令失敗則會引發錯誤    
         with yt_dlp.YoutubeDL({'extract_audio':True, 'format': 'bestaudio', 'outtmpl':output_file_yt}) as video:
             video.download(video_url)
         print(f"音訊檔案已下載為 {output_file_yt}")
