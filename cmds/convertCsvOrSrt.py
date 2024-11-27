@@ -1,7 +1,7 @@
 import discord
 from discord import app_commands
 from core.classes import Cog_extension
-from cmds.convertWav import download_audio_from_youtube
+from cmds.convertWav import convert_audio_to_wav
 from typing import Literal
 import os
 from cmds.convertTxt import transcribe
@@ -45,7 +45,7 @@ class ConvertCsvOrSrt(Cog_extension):
         print("正在執行...")  
         await interaction.response.send_message("請稍等一下")
         file_id = url.split('=')[-1]
-        output_file = download_audio_from_youtube(url, file_id)
+        output_file = convert_audio_to_wav(url, file_id)
         if output_file:
             try:
                 lang, segments = transcribe(output_file, language, model)
@@ -76,7 +76,7 @@ class ConvertCsvOrSrt(Cog_extension):
         print("正在執行...")  
         await interaction.response.send_message("請稍等一下")
         file_id = url.split('=')[-1]
-        output_file = download_audio_from_youtube(url, file_id)
+        output_file = convert_audio_to_wav(url, file_id)
         if output_file:
             try:
                 lang, segments = transcribe(output_file, language, model)

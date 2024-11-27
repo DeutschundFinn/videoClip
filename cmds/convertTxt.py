@@ -1,19 +1,13 @@
 import discord
 from discord import app_commands
 from core.classes import Cog_extension
-from cmds.convertWav import download_audio_from_youtube
+from cmds.convertWav import convert_audio_to_wav
 from typing import Literal
 from faster_whisper import WhisperModel
 import os
-import librosa
-import noisereduce
-import soundfile
 
 def transcribe(audio, lang, mod):
     print(f"正在轉換{audio}")
-    buffer, sample_rate = librosa.load(audio, sr=None) #讀取音訊檔案
-    buffer_denoised = noisereduce.reduce_noise(buffer, sr=sample_rate) #降噪
-    soundfile.write(audio, buffer_denoised, sample_rate) #重新寫入並覆蓋原檔
     model = WhisperModel(mod, compute_type='int8_float32')
     segments, info = model.transcribe(audio, language=lang, vad_filter=False, vad_parameters=dict(min_silence_duration_ms=100))  #Segments是以每個有100毫秒的無人聲片段所切間隔
     language = info[0]
@@ -28,7 +22,7 @@ class ConvertTxt(Cog_extension):
         print("正在執行...")  
         await interaction.response.send_message("請稍等一下")
         file_id = url.split('=')[-1]
-        output_file = download_audio_from_youtube(url, file_id)
+        output_file = convert_audio_to_wav(url, file_id)
         if output_file:
             try:
                 lang, segments = transcribe(output_file, language, model)
