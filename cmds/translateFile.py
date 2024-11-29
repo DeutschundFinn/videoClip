@@ -111,10 +111,7 @@ class RetranslationView(discord.ui.View): #按鈕
 
     async def on_timeout(self): #當超過3分鐘沒收到回應自動刪檔
         for item in self.children:
-            if item.disabled:
-                return
-            else:
-                item.disabled = True
+            item.disabled = True
         
         await self.response.edit(view=self)
         if os.path.exists(self.sourceFile):
