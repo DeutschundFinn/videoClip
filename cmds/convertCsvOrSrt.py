@@ -36,12 +36,13 @@ def generatesrt(segments, file_id):
             count += 1
             txt = f"{count}\n{start} --> {end}\n{segment.text}\n\n" #srt檔案表示法(/表示分行): 順序/開始時間 --> 結束時間/文字
             file.write(txt) #讀取音訊片段並寫入srt
+            
     return output_file   
 
 class ConvertCsvOrSrt(Cog_extension):
     @app_commands.command(description='從Youtube網址產生該影片字幕的csv檔案')
     @app_commands.describe(url='你要產生csv檔案的Youtube網址', language='音訊的語言', model='轉換時所使用的whisper模型')
-    async def convert_to_csv(self, interaction:discord.Interaction, url:str, language:str=None, model:Literal['tiny', 'base', 'medium', 'large-v1', 'large-v2']='base'):
+    async def convert_to_csv(self, interaction:discord.Interaction, url:str, language:str=None, model:Literal['tiny', 'base', 'medium', 'large-v1', 'large-v2']='large-v2'):
         print("正在執行...")  
         await interaction.response.send_message("請稍等一下")
         file_id = url.split('=')[-1]
@@ -72,7 +73,7 @@ class ConvertCsvOrSrt(Cog_extension):
     
     @app_commands.command(description='從Youtube網址產生該影片字幕的srt檔案')
     @app_commands.describe(url='你要產生srt檔案的Youtube網址', language='音訊的語言', model='轉換時所使用的whisper模型')
-    async def convert_to_srt(self, interaction:discord.Interaction, url:str, language:str=None, model:Literal['tiny', 'base', 'medium', 'large-v1', 'large-v2']='base'):
+    async def convert_to_srt(self, interaction:discord.Interaction, url:str, language:str=None, model:Literal['tiny', 'base', 'medium', 'large-v1', 'large-v2']='large-v2'):
         print("正在執行...")  
         await interaction.response.send_message("請稍等一下")
         file_id = url.split('=')[-1]

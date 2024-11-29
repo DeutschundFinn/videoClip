@@ -7,9 +7,9 @@ import csv
 import srt
 import pandas as pd
 
-genai.configure(api_key=os.getenv('googleaiKey'))
-model = genai.GenerativeModel('gemini-pro')
-config = genai.GenerationConfig(temperature=0)
+genai.configure(api_key=os.getenv('googleaiKey')) #指定API Key
+model = genai.GenerativeModel('gemini-pro') #指定使用的Gemini模型
+config = genai.GenerationConfig(temperature=0) #維持翻譯品質所以變異程度設為0
 
 def translateText(to_lang, from_lang, prompt): #交由Gemini幫忙翻譯的動作
     if from_lang is None:
@@ -23,15 +23,15 @@ def translateText(to_lang, from_lang, prompt): #交由Gemini幫忙翻譯的動�
 
 def translateFile(source:str, destination:str, toLang:str, fromLang:str): #翻譯整個檔案
     frmat = source.split('.')[-1]
-    if frmat == 'txt': #檢查如果是txt直接翻譯
+    if frmat == 'txt': #檢查如果是txt直接翻譯文字內容
         div = []
         with open(source, 'r', encoding='utf8') as txtFile:
             counter = 1
-            for row in txtFile.read().splitlines():
+            for row in txtFile.read().splitlines(): #將每一行加入編號以避免機器人翻譯時漏掉某些段落
                 div.append(str(counter)+'™'+row)
                 counter += 1
-            prompt = '\n'.join(div)
-        text = translateText(toLang, fromLang, prompt)
+            prompt = '\n'.join(div) 
+        text = translateText(toLang, fromLang, prompt) #將文字交給Gemini翻譯
         result = text.splitlines()
         for i in range(len(result)):
             result[i] = result[i].split('™')[-1]
@@ -45,11 +45,11 @@ def translateFile(source:str, destination:str, toLang:str, fromLang:str): #翻�
             reader = csv.DictReader(csvFile)
             counter = 1
             for row in reader:
-                div.append(str(counter)+'™'+row['text'])
+                div.append(str(counter)+'™'+row['text']) #將每一行加入編號以避免機器人翻譯時漏掉某些段落
                 data.append([row['start'], row['end'], row['text']])
                 counter += 1
             prompt = '\n'.join(div)
-            text = translateText(toLang, fromLang, prompt)
+            text = translateText(toLang, fromLang, prompt) #將文字交給Gemini翻譯
         for i in range(len(data)):
             data[i][2] = text.splitlines()[i].split('™')[-1]
         cols = ["start", "end", "text"]
@@ -62,10 +62,10 @@ def translateFile(source:str, destination:str, toLang:str, fromLang:str): #翻�
             srt_segments = srt.parse(content)
             srt_segments = list(srt_segments)
             for segment in srt_segments:
-                div.append(str(segment.index)+'™'+segment.content)
+                div.append(str(segment.index)+'™'+segment.content) #將每一行加入編號以避免機器人翻譯時漏掉某些段落
             
             prompt = '\n'.join(div)
-            text = translateText(toLang, fromLang, prompt)
+            text = translateText(toLang, fromLang, prompt) #將文字交給Gemini翻譯
             for segment in srt_segments:
                 segment.content = text.splitlines()[int(segment.index)-1].split('™')[-1]
         contents = srt.compose(srt_segments)

@@ -18,7 +18,7 @@ def transcribe(audio, lang, mod):
 class ConvertTxt(Cog_extension):
     @app_commands.command(description='從Youtube網址產生該影片字幕的txt檔案')
     @app_commands.describe(url='你要產生txt文字檔的Youtube網址', language='音訊的語言', model='轉換時所使用的whisper模型')
-    async def convert_to_txt(self, interaction:discord.Interaction, url:str, language:str=None, model:Literal['tiny', 'base', 'medium', 'large-v1', 'large-v2']='base'):
+    async def convert_to_txt(self, interaction:discord.Interaction, url:str, language:str=None, model:Literal['tiny', 'base', 'medium', 'large-v1', 'large-v2']='large-v2'):
         print("正在執行...")  
         await interaction.response.send_message("請稍等一下")
         file_id = url.split('=')[-1]

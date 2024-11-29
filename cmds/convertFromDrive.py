@@ -8,34 +8,33 @@ from cmds.convertCsvOrSrt import writetocsv, generatesrt
 import requests
 
 def get_confirm_token(response:requests.Response): #確認是否會遇到下載警告
-    for key, value in response.cookies.items():
+    for key, value in response.cookies.items(): #當有下載警告時獲取確認token
         if key.startswith("download_warning"):
             return value
 
     return None
 
-
-def save_response_content(response:requests.Response, destination):
-    CHUNK_SIZE = 32768
+def save_response_content(response:requests.Response, destination): #下載檔案
+    CHUNK_SIZE = 32768 #區塊大小(單位為bytes)
 
     with open(destination, "wb") as f:
-        for chunk in response.iter_content(CHUNK_SIZE):
-            if chunk:  #限制寫入速度
+        for chunk in response.iter_content(CHUNK_SIZE): #此處將大檔案分割成一堆小區塊進行下載
+            if chunk:  
                 f.write(chunk)
 
-def download_file_from_google_drive(file_id, destination):
-    URL = "https://docs.google.com/uc?export=download&confirm=1" #Google drive 要求下載的連結
+def download_file_from_google_drive(file_id, destination): #利用爬蟲從Google Drive 下載檔案
+    URL = "https://docs.google.com/uc?export=download&confirm=1" #指向分享連結中的檔案
 
     session = requests.Session() #保留使用者狀態
 
     response = session.get(URL, params={"id": file_id}, stream=True)  #獲取回應
-    token = get_confirm_token(response)
+    token = get_confirm_token(response) #檢查是否產生下載警告
 
-    if token: #當跑出下載警告時
+    if token: #當跑出下載警告時傳入確認下載的token
         params = {"id": file_id, "confirm": token}
         response = session.get(URL, params=params, stream=True)
 
-    save_response_content(response, destination)
+    save_response_content(response, destination) #將回應內容(檔案)下載至電腦
 
 class ConvertFromDrive(Cog_extension):
     @app_commands.command(description='從google雲端硬碟分享連結產生你想要的檔案(使用前請務必打開存取權)')
@@ -44,7 +43,7 @@ class ConvertFromDrive(Cog_extension):
                                  interaction:discord.Interaction, 
                                  url:str, 
                                  language:str=None, 
-                                 model:Literal['tiny', 'base', 'medium', 'large-v1', 'large-v2']='base', 
+                                 model:Literal['tiny', 'base', 'medium', 'large-v1', 'large-v2']='large-v2', 
                                  frmat:Literal['wav', 'txt', 'csv', 'srt']='txt'):
         print("正在執行...")  
         await interaction.response.send_message("請稍等一下")
