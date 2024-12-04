@@ -8,7 +8,7 @@ import srt
 import pandas as pd
 
 genai.configure(api_key=os.getenv('googleaiKey')) #指定API Key
-model = genai.GenerativeModel('gemini-pro') #指定使用的Gemini模型
+model = genai.GenerativeModel('gemini-1.5-pro') #指定使用的Gemini模型
 config = genai.GenerationConfig(temperature=0) #維持翻譯品質所以變異程度設為0
 
 def translateText(to_lang, from_lang, prompt): #交由Gemini幫忙翻譯的動作

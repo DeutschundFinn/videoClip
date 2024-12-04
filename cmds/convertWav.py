@@ -10,7 +10,6 @@ def download_audio_from_youtube(video_url, file_id):
     try:
         output_file_yt = f"{file_id}.mp3"
 
-        #會將 Youtube 影片中的音訊提取並轉換成 MP3 格式 然後儲存在指定的檔案名稱中
         with yt_dlp.YoutubeDL({'extract_audio':True, 'format': 'bestaudio', 'outtmpl':output_file_yt}) as video:
             video.download(video_url)
         print(f"音訊檔案已下載為 {output_file_yt}")
@@ -24,7 +23,9 @@ def download_audio_from_youtube(video_url, file_id):
 def convert_audio_to_wav(audio_url, file_id):
     try:
         downloaded_file_yt = None  # 初始化變數
+
         # 下載Youtube音訊
+        
         downloaded_file_yt = download_audio_from_youtube(audio_url, file_id)
 
         # 如果下載成功就載入音訊
