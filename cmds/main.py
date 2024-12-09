@@ -2,6 +2,7 @@ import discord
 from discord import app_commands
 from core.classes import Cog_extension
 from discord.ui import Button, View
+from discord.ext import commands
 
 class Main(Cog_extension):
     @app_commands.command(description='輸出這機器人的邀請連結')
@@ -18,5 +19,5 @@ class Main(Cog_extension):
         await interaction.response.send_message("開始刪除中...")
         await interaction.channel.purge(limit=number+1)   
 
-async def setup(bot):
+async def setup(bot:commands.Bot):
     await bot.add_cog(Main(bot))

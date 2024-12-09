@@ -5,6 +5,7 @@ from cmds.convertWav import convert_audio_to_wav
 from typing import Literal
 from faster_whisper import WhisperModel
 import os
+from discord.ext import commands
 
 def transcribe(audio, lang, mod):
     print(f"正在轉換{audio}")
@@ -53,5 +54,5 @@ class ConvertTxt(Cog_extension):
         else:
             await interaction.followup.send("轉檔失敗，請檢查輸入的連結")
 
-async def setup(bot):
+async def setup(bot:commands.Bot):
     await bot.add_cog(ConvertTxt(bot))

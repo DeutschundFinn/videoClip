@@ -3,9 +3,10 @@ from discord.ext import commands
 from core.classes import Cog_extension
 import google.generativeai as genai
 import os
+from discord.ext import commands
 
 genai.configure(api_key=os.getenv('googleaiKey')) #指定API Key
-model = genai.GenerativeModel('gemini-1.5-pro') #指定使用的Gemini模型
+model = genai.GenerativeModel('gemini-pro') #指定使用的Gemini模型
 
 class Event(Cog_extension):
     @commands.Cog.listener()
@@ -31,6 +32,5 @@ class Event(Cog_extension):
         else:
             await ctx.send(error)  
 
-
-async def setup(bot):
+async def setup(bot:commands.Bot):
     await bot.add_cog(Event(bot))

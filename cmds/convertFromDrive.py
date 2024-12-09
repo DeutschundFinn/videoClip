@@ -6,6 +6,7 @@ import os
 from cmds.convertTxt import transcribe
 from cmds.convertCsvOrSrt import writetocsv, generatesrt
 import requests
+from discord.ext import commands
 
 def get_confirm_token(response:requests.Response): #確認是否會遇到下載警告
     for key, value in response.cookies.items(): #當有下載警告時獲取確認token
@@ -83,5 +84,5 @@ class ConvertFromDrive(Cog_extension):
         else:
             await interaction.followup.send("轉檔失敗，請檢查輸入的連結")
 
-async def setup(bot):
+async def setup(bot:commands.Bot):
     await bot.add_cog(ConvertFromDrive(bot))

@@ -6,9 +6,10 @@ import google.generativeai as genai
 import csv
 import srt
 import pandas as pd
+from discord.ext import commands
 
 genai.configure(api_key=os.getenv('googleaiKey')) #指定API Key
-model = genai.GenerativeModel('gemini-1.5-pro') #指定使用的Gemini模型
+model = genai.GenerativeModel('gemini-pro') #指定使用的Gemini模型
 config = genai.GenerationConfig(temperature=0) #維持翻譯品質所以變異程度設為0
 
 def translateText(to_lang, from_lang, prompt): #交由Gemini幫忙翻譯的動作
@@ -111,8 +112,7 @@ class RetranslationView(discord.ui.View): #按鈕
 
     async def on_timeout(self): #當超過3分鐘沒收到回應自動刪檔
         for item in self.children:
-            if not item.disabled:
-                item.disabled = True
+            item.disabled = True
         
         await self.response.edit(view=self)
         if os.path.exists(self.sourceFile):
@@ -150,5 +150,5 @@ class TranslateFile(Cog_extension):
             print(f"翻譯時發生錯誤: {e}")
             await interaction.followup.send(f"翻譯時發生錯誤: {e}")
 
-async def setup(bot):
+async def setup(bot:commands.Bot):
     await bot.add_cog(TranslateFile(bot))

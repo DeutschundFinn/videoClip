@@ -7,6 +7,7 @@ import os
 from cmds.convertTxt import transcribe
 import time
 import pandas as pd
+from discord.ext import commands
 
 def formattedtime(seconds):
     final_time = time.strftime("%H:%M:%S", time.gmtime(float(seconds))) #從檔案開始將每個間隔所表示時間寫成字串
@@ -103,5 +104,5 @@ class ConvertCsvOrSrt(Cog_extension):
         else:
             await interaction.followup.send("轉檔失敗，請檢查輸入的連結")
 
-async def setup(bot):
+async def setup(bot:commands.Bot):
     await bot.add_cog(ConvertCsvOrSrt(bot))
