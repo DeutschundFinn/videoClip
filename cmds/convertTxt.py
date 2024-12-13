@@ -1,7 +1,7 @@
 import discord
 from discord import app_commands
 from core.classes import Cog_extension
-from cmds.convertWav import convert_audio_to_wav
+from cmds.convertWav import convert_url_to_wav, get_file_id
 from typing import Literal
 from faster_whisper import WhisperModel
 import os
@@ -22,8 +22,8 @@ class ConvertTxt(Cog_extension):
     async def convert_to_txt(self, interaction:discord.Interaction, url:str, language:str=None, model:Literal['tiny', 'base', 'medium', 'large-v1', 'large-v2']='large-v2'):
         print("正在執行...")  
         await interaction.response.send_message("請稍等一下")
-        file_id = url.split('=')[-1]
-        output_file = convert_audio_to_wav(url, file_id)
+        file_id = get_file_id(url)
+        output_file = convert_url_to_wav(url, file_id)
         if output_file:
             try:
                 lang, segments = transcribe(output_file, language, model)
