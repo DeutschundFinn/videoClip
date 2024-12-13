@@ -22,7 +22,7 @@ def save_response_content(response:requests.Response, destination): #下載檔�
             if chunk:  
                 f.write(chunk)
 
-def get_file_id(url:str):
+def get_file_id(url:str): #獲取檔案id
     if 'youtube.com' in url or 'youtu.be' in url:
         return url.split('=')[-1]
     elif 'drive.google.com' in url:
@@ -33,11 +33,11 @@ def download_audio(video_url, file_id):
     try:
         output_file = f"{file_id}.mp3"
 
-        if 'youtube.com' in video_url or 'youtu.be' in video_url:
+        if 'youtube.com' in video_url or 'youtu.be' in video_url: #如果是youtube網址就下載youtube音訊
             with yt_dlp.YoutubeDL({'extract_audio':True, 'format': 'bestaudio', 'outtmpl':output_file}) as video:
                 video.download(video_url)
 
-        elif 'drive.google.com' in video_url:
+        elif 'drive.google.com' in video_url: #如果是雲端硬碟檔案就下載雲端硬碟檔案
             URL = "https://docs.google.com/uc?export=download&confirm=1" #指向分享連結中的檔案
 
             session = requests.Session() #保留使用者狀態
