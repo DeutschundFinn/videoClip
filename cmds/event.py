@@ -26,7 +26,7 @@ class Event(Cog_extension):
         if isinstance(error, commands.CommandOnCooldown):
             await ctx.send(content='Command on cooldown... please wait')
         elif isinstance(error, commands.MissingPermissions):
-            await ctx.send(content="You don't have required permission to ude the command.")
+            await ctx.send(content="You don't have required permission to use the command.")
         elif isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(content="There are some arguments missing to use the command.")
         else:
