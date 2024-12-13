@@ -14,6 +14,8 @@ bot=commands.Bot(command_prefix='a!', intents=intents)
 @bot.event
 async def on_ready():
     print(f"Bot is online!")
+    game = discord.Game('molotoff cocktail')
+    await bot.change_presence(status=discord.Status.idle, activity=game)
 
 @bot.command()
 async def load(ctx, extension):
