@@ -1,0 +1,5 @@
+1.打開終端機輸入 pip install -r requirements.txt
+2.在.env輸入: 
+token=[你的discord bot token]
+googleaiKey=[你的gemini api key]
+3.此時啟動bot.py就可以了

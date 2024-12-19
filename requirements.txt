@@ -1,0 +1,7 @@
+discord.py
+google.generativeai
+faster-whisper
+python-dotenv
+asyncio
+yt-dlp
+pydub

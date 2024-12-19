@@ -1,0 +1,4 @@
+discord bot 初始化 - bot.py
+轉wav檔指令 - ConvertWav.py
+轉srt檔指令 - ConvertSrt.py
+串接Gemini - event.py
