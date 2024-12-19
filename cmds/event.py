@@ -21,6 +21,7 @@ class Event(Cog_extension):
             response = model.generate_content(prompt) #交給Gemini產生文字
             await msg.channel.send(response.text) #送出文字
 
+    #前綴指令除錯
     @commands.Cog.listener() 
     async def on_command_error(self, ctx:commands.Context, error):
         if isinstance(error, commands.CommandOnCooldown):

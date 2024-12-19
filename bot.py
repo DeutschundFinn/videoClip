@@ -5,18 +5,21 @@ from dotenv import load_dotenv
 import os
 import asyncio
 
-intents=discord.Intents.all()
-
+#載入環境變數
 load_dotenv()
 
+#bot初始化
+intents=discord.Intents.all()
 bot=commands.Bot(command_prefix='a!', intents=intents)
 
+#改變bot狀態
 @bot.event
 async def on_ready():
     print(f"Bot is online!")
     game = discord.Game('hunting as the white death')
     await bot.change_presence(status=discord.Status.idle, activity=game)
 
+#cog相關指令
 @bot.command()
 async def load(ctx, extension):
     await bot.load_extension(f"cmds.{extension}")
@@ -42,11 +45,13 @@ async def load_extenstions():
         if filename.endswith('.py'):
             await bot.load_extension(f"cmds.{filename[:-3]}")
 
+#啟動時載入cog
 async def main():
     async with bot:
         await load_extenstions()
-        await bot.start(os.getenv('token'))
+        await bot.start(os.getenv('token')) #載入cog，直接跳至setup函式
 
+#斜線指令error handling
 async def on_tree_error(interaction: discord.Interaction, error: app_commands.AppCommandError):
     if isinstance(error, app_commands.CommandOnCooldown):
         return await interaction.response.send_message(f"Command is currently on cooldown! Try again in **{error.retry_after:.2f}** seconds!")

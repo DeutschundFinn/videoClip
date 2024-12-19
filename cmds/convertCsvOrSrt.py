@@ -6,8 +6,8 @@ from typing import Literal
 import os
 from cmds.convertTxt import transcribe
 import time
-import pandas as pd
 from discord.ext import commands
+import pandas as pd
 
 def formattedtime(seconds):
     final_time = time.strftime("%H:%M:%S", time.gmtime(float(seconds))) #從檔案開始將每個間隔所表示時間寫成字串
@@ -71,7 +71,7 @@ class ConvertCsvOrSrt(Cog_extension):
         
         else:
             await interaction.followup.send("轉檔失敗，請檢查輸入的連結")
-    
+            
     @app_commands.command(description='從Youtube網址產生該影片字幕的srt檔案')
     @app_commands.describe(url='你要產生srt檔案的Youtube網址', language='音訊的語言', model='轉換時所使用的whisper模型')
     async def convert_to_srt(self, interaction:discord.Interaction, url:str, language:str=None, model:Literal['tiny', 'base', 'medium', 'large-v1', 'large-v2']='large-v2'):
